@@ -1,0 +1,7 @@
+{
+  "name": "MindSync",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
