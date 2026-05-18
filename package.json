@@ -1,5 +1,5 @@
 {
-  "name": "MindSync",
+  "name": "StressOut",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -17,6 +17,7 @@
     "@capacitor/haptics": "8.0.0",
     "@capacitor/keyboard": "8.0.0",
     "@capacitor/status-bar": "8.0.0",
+    "@google/generative-ai": "^0.24.1",
     "@ionic/vue": "^8.0.0",
     "@ionic/vue-router": "^8.0.0",
     "firebase": "^12.12.1",

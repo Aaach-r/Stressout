@@ -293,6 +293,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { getUserDataFromDb, updateUserDataInDb, getUserTasksFromDb, saveTaskToDb, deleteTaskFromDb } from '../services/firebase';
+import { startAxelChatSession } from '../services/ai';
 import { 
   IonPage, IonContent, IonRange, IonItem, IonItemSliding, IonItemOptions, IonItemOption, 
   IonIcon, IonModal, IonInput, IonButton, IonSegment, IonSegmentButton, IonLabel,
@@ -381,6 +382,9 @@ onMounted(async () => {
     moveMascotRandomly();
     movementInterval = setInterval(moveMascotRandomly, 5000);
   }, 1000);
+
+  // Initialize AI chat session
+  axelChatSession = startAxelChatSession();
 });
 
 onUnmounted(() => { if (movementInterval) clearInterval(movementInterval); });
@@ -459,66 +463,53 @@ const mascotDynamicStyle = computed(() => ({ transform: `translate(${mascotX.val
 const isChatOpen = ref(false);
 const newChatMessage = ref('');
 const isAxelTyping = ref(false);
+let axelChatSession: any = null;
 
 const setChatOpen = (state: boolean) => { isChatOpen.value = state; };
 const toggleBubble = () => { setChatOpen(true); };
 
 const chatMessages = ref([{ role: 'axel', text: '¡Hola! Soy Axel. Mi programación está enfocada en ayudarte con el estrés. ¿Qué hay en tu mente hoy?' }]);
 
-const axelAIResponse = (userInput: string) => {
-  const text = userInput.toLowerCase();
-  const contains = (keys: string[]) => keys.some(key => text.includes(key));
-
-  if (contains(['examen', 'parcial', 'evaluación', 'prueba', 'calificación', 'reprob', 'nota'])) {
-    return "Los exámenes son picos de estrés intensos. Recuerda: una nota no define tu valor. Si te sientes abrumado, intenta usar el 'Diario de Descarga' (🧠) aquí abajo para vaciar tu mente antes de seguir estudiando.";
-  }
-  
-  if (contains(['procrastin', 'distra', 'concentr', 'enfoc', 'celular', 'redes'])) {
-    return "Es normal distraerse cuando la tarea parece gigante. Te sugiero usar el botón de 'Desglose Mágico' (✨) en tus tareas pesadas, o intentar un 'Pomodoro Empático' tocando la tarea. ¡Vamos paso a paso!";
-  }
-
-  if (contains(['mucho', 'bastante', 'demasiado', 'no puedo', 'tiempo', 'tarde', 'entreg'])) {
-    return "Respira. Cuando hay demasiado que hacer, activa el 'Modo Supervivencia' (🚨 SOS) arriba. Ocultará lo no esencial para que solo te enfoques en salvar el día. Tu salud mental va primero.";
-  }
-
-  if (contains(['estrés', 'ansiedad', 'nervios', 'miedo', 'abrumad', 'pánico'])) {
-    return "Respiro tu tensión. Tu sistema nervioso está en alerta. Hagamos esto: usa el botón de la hoja (🍃) para hacer el ejercicio de respiración 4-7-8. Te prometo que en 2 minutos pensarás más claro.";
-  }
-
-  if (contains(['cansad', 'sueño', 'agotad', 'burnout', 'energía', 'dormi', 'cabeza'])) {
-    return `Veo que tu batería podría estar baja. Tu cerebro necesita descanso, no más pantallas. Te prescribo formalmente 20 minutos de desconexión total.`;
-  }
-
-  if (contains(['ok', 'oki', 'vale', 'va', 'gracias', 'si', 'bueno', 'genial', 'excelente'])) {
-    return "¡Para eso estoy! Recuerda mantener vigilada tu Batería Mental. ¡Tú puedes con esto, campeón! ⚡";
-  }
-
-  if (contains(['hola', 'buenas', 'hey', 'qué tal', 'axel'])) {
-    return "¡Hola! Soy Axel, tu asistente de bienestar estudiantil. ¿Cómo están tus niveles de energía y estrés hoy para la escuela?";
-  }
-
-  if (text.length < 15) {
-    return "¿Todo bien? Como tu asistente, estoy aquí para escucharte. Cuéntame un poco más sobre lo que tienes que hacer o cómo te sientes.";
-  }
-
-  return "Te entiendo perfectamente. La vida universitaria es un reto de resistencia, no de velocidad. ¿Quieres que veamos tu lista de tareas o prefieres hacer una pausa de respiración guiada?";
-};
-
-const sendChatMessage = () => {
+const sendChatMessage = async () => {
   if (!newChatMessage.value.trim() || isAxelTyping.value) return;
+  
   const userText = newChatMessage.value;
   chatMessages.value.push({ role: 'user', text: userText });
   newChatMessage.value = '';
   isAxelTyping.value = true;
   
+  // Desplazar hacia abajo
   setTimeout(() => {
-    chatMessages.value.push({ role: 'axel', text: axelAIResponse(userText) });
+    const container = document.getElementById('chat-container');
+    if (container) container.scrollTop = container.scrollHeight;
+  }, 50);
+  
+  try {
+    if (!axelChatSession) {
+      axelChatSession = startAxelChatSession();
+    }
+    
+    // Provide a small hint of current context to Axel without showing it in the chat
+    const contextInfo = `[Nivel de Energía del Usuario: ${energyLevel.value}%] `;
+    const finalMessage = contextInfo + userText;
+    
+    const result = await axelChatSession.sendMessage(finalMessage);
+    const responseText = result.response.text();
+    
+    chatMessages.value.push({ role: 'axel', text: responseText });
+  } catch (error) {
+    console.error("Error communicating with Axel AI:", error);
+    chatMessages.value.push({ 
+      role: 'axel', 
+      text: 'Lo siento, estoy teniendo problemas de conexión con mi módulo de IA. ¿Tienes configurada la API Key?' 
+    });
+  } finally {
     isAxelTyping.value = false;
     setTimeout(() => {
       const container = document.getElementById('chat-container');
       if (container) container.scrollTop = container.scrollHeight;
     }, 50);
-  }, 1200);
+  }
 };
 
 // --- BOTIQUÍN ZEN ---

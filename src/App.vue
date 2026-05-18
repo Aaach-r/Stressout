@@ -3,7 +3,7 @@
     <div v-if="isLoading" class="splash-screen">
       <div class="logo-container">
         <div class="pulse-circle"></div>
-        <h1>MindSync</h1>
+        <h1>StressOut</h1>
         <p>Sincronizando energía...</p>
       </div>
     </div>
