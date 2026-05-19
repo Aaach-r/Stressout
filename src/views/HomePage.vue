@@ -203,7 +203,7 @@
       <ion-modal :is-open="isChatOpen" :initial-breakpoint="0.85" :breakpoints="[0, 0.85, 1]" @didDismiss="setChatOpen(false)">
         <div class="chat-modal">
           <div class="chat-header">
-            <div class="chat-avatar"><img src="/public/axel_alto.png" alt="Axel" /></div>
+            <div class="chat-avatar"><img src="/axel_alto.png" alt="Axel" /></div>
             <div class="chat-title-info">
               <h3>Axel IA</h3>
               <p style="display: flex; align-items: center; gap: 5px;">Tu Mini-Psicólogo Digital <ion-icon :icon="hardwareChipOutline"></ion-icon></p>
@@ -398,7 +398,7 @@ onMounted(async () => {
   const tasks = await getUserTasksFromDb(userId);
   if (tasks && tasks.length > 0) {
     // Limpiar emojis legacy que ya estaban guardados en la base de datos local
-    tasks.forEach(t => {
+    tasks.forEach((t: any) => {
       if (t.title) t.title = t.title.replace(/[🔥🍃💧✨🧠🚀🩺🛡️🎁💧🧘🎵🌬️🚶🍎📝🧊😂👀🐶]/g, '').trim();
       if (t.difficultyLabel) t.difficultyLabel = t.difficultyLabel.replace(/[🔥🍃💧✨🧠🚀🩺🛡️🎁]/g, '').trim();
     });
@@ -457,9 +457,9 @@ watch(energyLevel, async (newLevel, oldLevel) => {
 
 // --- GESTIÓN VISUAL DE LA MASCOTA ---
 const currentMascotImage = computed(() => {
-  if (energyLevel.value > 70) return '/public/axel_alto.png';
-  if (energyLevel.value > 30) return '/public/axel_medio.png';
-  return '/public/axel_bajo.png';
+  if (energyLevel.value > 70) return '/axel_alto.png';
+  if (energyLevel.value > 30) return '/axel_medio.png';
+  return '/axel_bajo.png';
 });
 watch(currentMascotImage, () => { imageLoaded.value = true; });
 const handleImageError = () => { imageLoaded.value = false; };
@@ -1038,7 +1038,7 @@ h1 { font-size: 26px; font-weight: 700; color: #1A202C; margin: 5px 0; }
 .modal-content { height: 100%; background: white; }
 .input-group { margin-bottom: 20px; }
 .input-group label { display: block; font-size: 12px; font-weight: bold; color: #486581; margin-bottom: 8px; }
-.custom-input { --background: #F0F4F8; --padding-start: 15px; border-radius: 8px; }
+.custom-input { --background: #F0F4F8; --color: #2D3748; --padding-start: 15px; border-radius: 8px; }
 .difficulty-selector { display: flex; gap: 10px; margin-top: 5px; }
 .diff-option { flex: 1; padding: 12px; text-align: center; background: #F0F4F8; border-radius: 8px; font-weight: 600; color: #829AB1; cursor: pointer; transition: all 0.2s; }
 .diff-option.active { background: white; color: #3182CE; border: 2px solid #3182CE; box-shadow: 0 4px 10px rgba(49, 130, 206, 0.15); }
@@ -1061,7 +1061,7 @@ h1 { font-size: 26px; font-weight: 700; color: #1A202C; margin: 5px 0; }
 .magic-btn { width: 28px; height: 28px; background: #FAF5FF; border: 2px solid #D6BCFA; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #9F7AEA; }
 .magic-btn:active { background: #D6BCFA; color: white; transform: scale(0.9); }
 .survival-toggle { --background: #E2E8F0; --background-checked: #FC8181; --handle-background-checked: white; font-weight: bold; font-size: 12px; }
-.custom-textarea { --background: #F0F4F8; --padding-start: 15px; --padding-top: 15px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; }
+.custom-textarea { --background: #F0F4F8; --color: #2D3748; --padding-start: 15px; --padding-top: 15px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; }
 .pomodoro-circle { width: 200px; height: 200px; border-radius: 50%; border: 8px solid #E2E8F0; display: flex; justify-content: center; align-items: center; font-size: 48px; font-weight: bold; color: #2D3748; margin-top: 30px; transition: border-color 0.3s; }
 .pomodoro-circle.running { border-color: #4FD1C5; color: #319795; box-shadow: 0 0 30px rgba(79, 209, 197, 0.4); }
 
@@ -1081,7 +1081,7 @@ h1 { font-size: 26px; font-weight: 700; color: #1A202C; margin: 5px 0; }
 .msg-user .message-bubble { background: #4FD1C5; color: white; border-bottom-right-radius: 4px; }
 .msg-axel .message-bubble { background: white; color: #2D3748; border-bottom-left-radius: 4px; border: 1px solid #EDF2F7; }
 .chat-input-area { display: flex; align-items: center; padding: 15px 20px; background: white; border-top: 1px solid #EDF2F7; }
-.chat-input-area input { flex: 1; padding: 12px 20px; border: none; background: #F4F7FE; border-radius: 20px; outline: none; font-size: 14px; }
+.chat-input-area input { flex: 1; padding: 12px 20px; border: none; background: #F4F7FE; color: #2D3748; border-radius: 20px; outline: none; font-size: 14px; }
 .send-btn { background: #4FD1C5; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; margin-left: 10px; display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer; }
 
 /* BOTIQUÍN ZEN */

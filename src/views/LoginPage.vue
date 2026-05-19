@@ -5,7 +5,7 @@
       <div class="login-container animate-up">
         <div class="hero-section">
           <div class="mascot-circle">
-            <img src="/public/axel_alto.png" alt="Axel" class="hero-img" />
+            <img src="/axel_alto.png" alt="Axel" class="hero-img" />
           </div>
           <h1 class="app-title">Stressout</h1>
           <p class="app-subtitle">Tu mente es tu mayor activo.<br>Cuídala.</p>
@@ -72,7 +72,7 @@ const doAuth = async () => {
       res = await login(email.value, password.value);
     }
 
-    if (res?.mock) {
+    if ((res as any)?.mock) {
       // Si Firebase no está configurado, simulamos el login y avisamos
       const toast = await toastController.create({ 
         message: 'Aviso: Firebase no configurado. Usando modo de prueba local.', 
@@ -87,8 +87,8 @@ const doAuth = async () => {
     }
     
     // Guardamos el UID en localStorage temporalmente si queremos para referencias rápidas
-    if (res?.user?.uid) {
-      localStorage.setItem('mindSyncUserId', res.user.uid);
+    if ((res as any)?.user?.uid) {
+      localStorage.setItem('mindSyncUserId', (res as any).user.uid);
     } else {
       localStorage.setItem('mindSyncUserId', 'mock-user-123');
     }
