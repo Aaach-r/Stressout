@@ -4,8 +4,8 @@
       
       <div class="header-container">
         <div class="header-texts">
-          <span class="date-badge">{{ todayDate }} <span class="streak-badge" v-if="balanceStreak > 0">🍃 Racha: {{ balanceStreak }}</span></span>
-          <h1>Hola, Campeón 👋</h1>
+          <span class="date-badge">{{ todayDate }} <span class="streak-badge" v-if="balanceStreak > 0"><ion-icon :icon="flameOutline" style="margin-right: 4px;"></ion-icon> Racha: {{ balanceStreak }}</span></span>
+          <h1>Hola, Campeón</h1>
         </div>
         <div class="profile-btn" @click="goToProfile">
           <img src="https://i.pravatar.cc/150?img=12" alt="Perfil" />
@@ -18,12 +18,12 @@
           
           <div class="mascot-floater" :style="mascotDynamicStyle" @click="toggleBubble">
             <div class="advice-bubble" v-if="!isChatOpen">
-              <span v-if="isThinking">Analizando tu biometría... 🔄</span>
+              <span v-if="isThinking" style="display: flex; align-items: center; gap: 5px;">Analizando tu biometría... <ion-spinner name="dots" style="width: 15px; height: 15px;"></ion-spinner></span>
               <span v-else>{{ currentAdvice }}</span>
             </div>
             
             <img v-if="imageLoaded" :src="currentMascotImage" class="mascot-img-live" @error="handleImageError" />
-            <div v-else class="emoji-fallback">{{ currentEmoji }}</div>
+            <div v-else class="emoji-fallback" style="font-size: 30px; color: #4FD1C5;"><ion-icon :icon="currentEmoji"></ion-icon></div>
           </div>
 
           <div class="card-content content-layer">
@@ -71,7 +71,11 @@
                   <ion-icon v-if="task.source === 'teams'" :icon="logoMicrosoft" class="source-icon teams-color"></ion-icon>
                   <ion-icon v-if="task.source === 'classroom'" :icon="logoGoogle" class="source-icon google-color"></ion-icon>
                 </div>
-                <p>{{ task.materia }} • {{ task.difficultyLabel }}</p>
+                <p style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
+                  {{ task.materia }} • 
+                  <ion-icon :icon="getDifficultyIcon(task.difficulty)" :style="{ color: getDifficultyIconColor(task.difficulty) }"></ion-icon> 
+                  {{ task.difficultyLabel }}
+                </p>
               </div>
 
               <div class="task-action" style="display: flex; gap: 10px; align-items: center;">
@@ -119,7 +123,7 @@
 
       <ion-modal :is-open="isOpen" :initial-breakpoint="0.6" :breakpoints="[0, 0.6]" @didDismiss="setOpen(false)">
         <div class="modal-content ion-padding">
-          <h3>Nueva Misión 🚀</h3>
+          <h3 style="display: flex; align-items: center; gap: 8px;"><ion-icon :icon="rocketOutline" color="primary"></ion-icon> Nueva Misión</h3>
           <div class="input-group">
             <label>Título</label>
             <ion-input v-model="newTask.title" placeholder="Ej. Leer Capítulo 1" class="custom-input"></ion-input>
@@ -131,9 +135,9 @@
           <div class="input-group">
             <label>Nivel de Desgaste</label>
             <div class="difficulty-selector">
-              <div class="diff-option" :class="{ active: newTask.difficulty === 1 }" @click="newTask.difficulty = 1">🍃 Bajo</div>
-              <div class="diff-option" :class="{ active: newTask.difficulty === 2 }" @click="newTask.difficulty = 2">💧 Medio</div>
-              <div class="diff-option" :class="{ active: newTask.difficulty === 3 }" @click="newTask.difficulty = 3">🔥 Alto</div>
+              <div class="diff-option" :class="{ active: newTask.difficulty === 1 }" @click="newTask.difficulty = 1"><ion-icon :icon="leafOutline" style="color: #48BB78; margin-right: 5px;"></ion-icon> Bajo</div>
+              <div class="diff-option" :class="{ active: newTask.difficulty === 2 }" @click="newTask.difficulty = 2"><ion-icon :icon="waterOutline" style="color: #4299E1; margin-right: 5px;"></ion-icon> Medio</div>
+              <div class="diff-option" :class="{ active: newTask.difficulty === 3 }" @click="newTask.difficulty = 3"><ion-icon :icon="flameOutline" style="color: #F56565; margin-right: 5px;"></ion-icon> Alto</div>
             </div>
           </div>
           <ion-button expand="block" class="save-btn" @click="attemptAddTask">Guardar Tarea</ion-button>
@@ -142,8 +146,8 @@
 
       <ion-modal :is-open="isDiagOpen" :initial-breakpoint="0.95" :breakpoints="[0, 0.95, 1]" @didDismiss="setDiagOpen(false)">
         <div class="modal-content ion-padding">
-          <h3>Escáner de Bienestar 🩺</h3>
-          <p class="modal-subtitle">4 factores clave para calibrar tu batería mental con precisión.</p>
+          <h3 style="display: flex; align-items: center; gap: 8px;"><ion-icon :icon="pulseOutline" color="secondary"></ion-icon> Escáner de Bienestar</h3>
+          <p class="modal-subtitle">6 factores clave para calibrar tu batería mental con precisión.</p>
           <div class="diag-question">
             <label>1. Sueño (Anoche)</label>
             <ion-segment v-model="diagSleep">
@@ -161,7 +165,23 @@
             </ion-segment>
           </div>
           <div class="diag-question">
-            <label>3. Nivel de Ansiedad/Estrés</label>
+            <label>3. Hidratación (Agua hoy)</label>
+            <ion-segment v-model="diagHydration">
+              <ion-segment-button value="bad"><ion-label>Poca</ion-label></ion-segment-button>
+              <ion-segment-button value="neutral"><ion-label>Regular</ion-label></ion-segment-button>
+              <ion-segment-button value="good"><ion-label>Suficiente</ion-label></ion-segment-button>
+            </ion-segment>
+          </div>
+          <div class="diag-question">
+            <label>4. Fatiga Visual / Pantallas</label>
+            <ion-segment v-model="diagScreenTime">
+              <ion-segment-button value="high"><ion-label>Excesivo</ion-label></ion-segment-button>
+              <ion-segment-button value="neutral"><ion-label>Normal</ion-label></ion-segment-button>
+              <ion-segment-button value="low"><ion-label>Poco</ion-label></ion-segment-button>
+            </ion-segment>
+          </div>
+          <div class="diag-question">
+            <label>5. Nivel de Ansiedad/Estrés</label>
             <ion-segment v-model="diagStress">
               <ion-segment-button value="high"><ion-label>Mucho</ion-label></ion-segment-button>
               <ion-segment-button value="neutral"><ion-label>Algo</ion-label></ion-segment-button>
@@ -169,7 +189,7 @@
             </ion-segment>
           </div>
           <div class="diag-question">
-            <label>4. Sobrecarga Cognitiva</label>
+            <label>6. Sobrecarga Cognitiva</label>
             <ion-segment v-model="diagCognitive">
               <ion-segment-button value="yes"><ion-label>Saturado</ion-label></ion-segment-button>
               <ion-segment-button value="little"><ion-label>Regular</ion-label></ion-segment-button>
@@ -186,7 +206,7 @@
             <div class="chat-avatar"><img src="/public/axel_alto.png" alt="Axel" /></div>
             <div class="chat-title-info">
               <h3>Axel IA</h3>
-              <p>Tu Mini-Psicólogo Digital 🧠</p>
+              <p style="display: flex; align-items: center; gap: 5px;">Tu Mini-Psicólogo Digital <ion-icon :icon="hardwareChipOutline"></ion-icon></p>
             </div>
             <ion-icon :icon="closeOutline" class="close-chat" @click="setChatOpen(false)"></ion-icon>
           </div>
@@ -248,7 +268,7 @@
       <!-- DIARIO DE DESCARGA EXPRÉS -->
       <ion-modal :is-open="isDumpOpen" :initial-breakpoint="0.8" :breakpoints="[0, 0.8]" @didDismiss="setDumpOpen(false)">
         <div class="modal-content ion-padding">
-          <h3>Diario de Descarga 🧠</h3>
+          <h3 style="display: flex; align-items: center; gap: 8px;"><ion-icon :icon="hardwareChipOutline" color="primary"></ion-icon> Diario de Descarga</h3>
           <p class="modal-subtitle">Escribe todo lo que te abruma. Separaremos las tareas por ti.</p>
           <ion-textarea 
             v-model="dumpText" 
@@ -257,7 +277,7 @@
             :rows="6"
           ></ion-textarea>
           <ion-button expand="block" class="save-btn" @click="processBrainDump" :disabled="isThinkingDump">
-            <span v-if="!isThinkingDump">Extraer Tareas ✨</span>
+            <span v-if="!isThinkingDump" style="display: flex; align-items: center; gap: 5px;"><ion-icon :icon="sparkles"></ion-icon> Extraer Tareas</span>
             <ion-spinner v-else name="dots"></ion-spinner>
           </ion-button>
         </div>
@@ -303,7 +323,9 @@ import { useRouter } from 'vue-router';
 import { 
   flash, trashOutline, pulseOutline, logoMicrosoft, logoGoogle, closeOutline, 
   sendOutline, leafOutline, bulbOutline, volumeHighOutline, volumeMuteOutline, star,
-  sparkles, createOutline, timerOutline 
+  sparkles, createOutline, timerOutline, rocketOutline, waterOutline, flameOutline,
+  hardwareChipOutline, happyOutline, sadOutline, shieldCheckmarkOutline, warningOutline,
+  giftOutline, heartOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -339,21 +361,23 @@ const diagSleep = ref('neutral');
 const diagFood = ref('neutral');
 const diagStress = ref('neutral');
 const diagCognitive = ref('little');
+const diagHydration = ref('neutral');
+const diagScreenTime = ref('neutral');
 
 // --- BÓVEDA DE MISIONES DE AUTOCUIDADO (GAMIFICACIÓN) ---
 const selfCareMissions = [
-  "Beber 1 vaso de agua fresca 💧",
-  "Estiramiento de cuello y hombros por 1 min 🧘",
-  "Escuchar tu canción favorita a todo volumen 🎵",
-  "Cerrar los ojos y respirar profundo por 1 minuto 🌬️",
-  "Dar una caminata corta de 5 minutos 🚶",
-  "Comer un snack saludable o una fruta 🍎",
-  "Escribir 3 cosas por las que estás agradecido hoy 📝",
-  "Lavar tu cara con agua fría 🧊",
-  "Ver un video que te dé mucha risa 😂",
-  "Despegar la vista de la pantalla por 2 minutos 👀",
-  "Hacer 5 respiraciones profundas (Técnica 4-7-8) 🍃",
-  "Acariciar a tu mascota (o ver videos de perritos) 🐶"
+  "Beber 1 vaso de agua fresca",
+  "Estiramiento de cuello y hombros por 1 min",
+  "Escuchar tu canción favorita a todo volumen",
+  "Cerrar los ojos y respirar profundo por 1 minuto",
+  "Dar una caminata corta de 5 minutos",
+  "Comer un snack saludable o una fruta",
+  "Escribir 3 cosas por las que estás agradecido hoy",
+  "Lavar tu cara con agua fría",
+  "Ver un video que te dé mucha risa",
+  "Despegar la vista de la pantalla por 2 minutos",
+  "Hacer 5 respiraciones profundas (Técnica 4-7-8)",
+  "Acariciar a tu mascota (o ver videos de perritos)"
 ];
 
 // --- VIDA ARTIFICIAL (MOVIMIENTO AXEL) ---
@@ -373,9 +397,14 @@ onMounted(async () => {
   
   const tasks = await getUserTasksFromDb(userId);
   if (tasks && tasks.length > 0) {
+    // Limpiar emojis legacy que ya estaban guardados en la base de datos local
+    tasks.forEach(t => {
+      if (t.title) t.title = t.title.replace(/[🔥🍃💧✨🧠🚀🩺🛡️🎁💧🧘🎵🌬️🚶🍎📝🧊😂👀🐶]/g, '').trim();
+      if (t.difficultyLabel) t.difficultyLabel = t.difficultyLabel.replace(/[🔥🍃💧✨🧠🚀🩺🛡️🎁]/g, '').trim();
+    });
     allTasks.value = tasks;
   } else {
-    allTasks.value = [{ id: 1, title: 'Terminar memoria técnica', materia: 'Taller II', difficulty: 3, difficultyLabel: '🔥 Difícil', source: 'manual' }];
+    allTasks.value = [{ id: 1, title: 'Terminar memoria técnica', materia: 'Taller II', difficulty: 3, difficultyLabel: 'Difícil', source: 'manual' }];
   }
 
   setTimeout(() => {
@@ -413,11 +442,12 @@ watch(energyLevel, async (newLevel, oldLevel) => {
       const randomMission = selfCareMissions[Math.floor(Math.random() * selfCareMissions.length)];
       allTasks.value.unshift({ 
         id: Date.now(), title: randomMission, materia: 'Axel te Cuida', 
-        difficulty: 0, difficultyLabel: '✨ Recuperación', source: 'manual' 
+        difficulty: 0, difficultyLabel: 'Recuperación', source: 'manual' 
       });
 
       const toast = await toastController.create({
-        message: '🎁 Axel ha detectado fatiga y te asignó una misión especial.',
+        message: 'Axel ha detectado fatiga y te asignó una misión especial.',
+        icon: giftOutline,
         duration: 3000, color: 'tertiary'
       });
       await toast.present();
@@ -433,13 +463,13 @@ const currentMascotImage = computed(() => {
 });
 watch(currentMascotImage, () => { imageLoaded.value = true; });
 const handleImageError = () => { imageLoaded.value = false; };
-const currentEmoji = computed(() => (energyLevel.value > 70 ? '⚡️' : energyLevel.value > 30 ? '🙂' : '😮‍💨'));
+const currentEmoji = computed(() => (energyLevel.value > 70 ? flash : energyLevel.value > 30 ? happyOutline : sadOutline));
 
 const currentAdvice = computed(() => {
-  if (energyLevel.value > 80) return "Tu enfoque está al máximo. ¡Aprovecha! ⚡";
-  if (energyLevel.value > 50) return "Buen ritmo. Recuerda tomar agua. 💧";
-  if (energyLevel.value > 20) return "Tu energía baja. Tómate 5 minutos. 🍃";
-  return "Nivel crítico. Necesitas descansar ya. 🚨";
+  if (energyLevel.value > 80) return "Tu enfoque está al máximo. ¡Aprovecha!";
+  if (energyLevel.value > 50) return "Buen ritmo. Recuerda tomar agua.";
+  if (energyLevel.value > 20) return "Tu energía baja. Tómate 5 minutos.";
+  return "Nivel crítico. Necesitas descansar ya.";
 });
 
 const currentQuote = computed(() => {
@@ -555,7 +585,7 @@ const attemptAddTask = async () => {
   if (!newTask.value.title) return;
   if (energyLevel.value < 30 && newTask.value.difficulty === 3) {
     const alert = await alertController.create({ 
-      header: '⚠️ Axel te protege', message: 'Muy cansado para esto. ¿Seguro?', 
+      header: 'Axel te protege', message: 'Muy cansado para esto. ¿Seguro?', 
       buttons: [{ text: 'Descansar', role: 'cancel' }, { text: 'Agregar', handler: () => addTaskLogic() }]
     });
     await alert.present();
@@ -563,9 +593,9 @@ const attemptAddTask = async () => {
 };
 
 const addTaskLogic = async () => {
-  let label = '💧 Medio';
-  if (newTask.value.difficulty === 3) label = '🔥 Difícil';
-  if (newTask.value.difficulty === 1) label = '🍃 Fácil';
+  let label = 'Medio';
+  if (newTask.value.difficulty === 3) label = 'Difícil';
+  if (newTask.value.difficulty === 1) label = 'Fácil';
   
   const newTaskObj = { id: Date.now(), title: newTask.value.title, materia: newTask.value.materia || 'General', difficulty: newTask.value.difficulty, difficultyLabel: label, source: 'manual' as const };
   allTasks.value.push(newTaskObj);
@@ -582,58 +612,21 @@ const completeTask = async (task: Task) => {
     energyLevel.value = newEnergy;
     consecutiveTasksWithoutBreak.value = 0; // Se tomó un descanso
     
-    // LÓGICA DE RACHA DE AUTOCUIDADO (MÁXIMO +1 POR DÍA)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayStr = today.toDateString();
-    const lastStreakDateStr = localStorage.getItem('mindSyncLastStreakDate');
-    
-    let streakMessage = '';
-    
-    if (lastStreakDateStr !== todayStr) {
-      if (lastStreakDateStr) {
-        const lastDate = new Date(lastStreakDateStr);
-        const diffTime = Math.abs(today.getTime() - lastDate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-        
-        if (diffDays > 1) {
-          const lostStreak = balanceStreak.value;
-          localStorage.setItem('mindSyncPreviousStreak', lostStreak.toString());
-          
-          balanceStreak.value = 1; // Rompió la racha
-          streakMessage = '¡Nueva racha iniciada! 🍃';
-          
-          if (lostStreak > 2) {
-             setTimeout(() => offerStreakRecovery(lostStreak), 3500);
-          }
-        } else {
-          balanceStreak.value++; // Racha continua
-          streakMessage = `¡Racha aumentada a ${balanceStreak.value}! 🔥`;
-        }
-      } else {
-        balanceStreak.value = 1; // Primera vez
-        streakMessage = '¡Primera racha de autocuidado! 🍃';
-      }
-      
-      localStorage.setItem('mindSyncStreak', balanceStreak.value.toString());
-      localStorage.setItem('mindSyncLastStreakDate', todayStr);
-    } else {
-      streakMessage = 'Recuperaste energía. (Racha de hoy completada ✅)';
-    }
+    let streakMessage = '¡Energía recuperada! +15%';
 
     if (task.materia === 'Reconexión') {
       const prevStreak = parseInt(localStorage.getItem('mindSyncPreviousStreak') || '1');
       balanceStreak.value = prevStreak + 1; // Restaura la anterior + la de hoy
       localStorage.setItem('mindSyncStreak', balanceStreak.value.toString());
       localStorage.removeItem('mindSyncPreviousStreak'); // Limpia
-      streakMessage = `¡Racha de ${prevStreak} días restaurada y aumentada! 🛡️`;
+      streakMessage = `¡Racha de ${prevStreak} días restaurada y aumentada!`;
     }
 
     setTimeout(async () => { 
       allTasks.value = allTasks.value.filter(t => t.id !== task.id); 
       await deleteTaskFromDb(task.id);
     }, 300);
-    const toast = await toastController.create({ message: `✨ ${streakMessage}`, duration: 3500, color: 'success' }); 
+    const toast = await toastController.create({ message: `${streakMessage}`, icon: sparkles, duration: 3500, color: 'success' }); 
     await toast.present();
   } else {
     let cost = task.difficulty === 3 ? 15 : task.difficulty === 2 ? 10 : 5;
@@ -683,27 +676,73 @@ watch(energyLevel, (newVal) => {
 
 const calculateRealEnergy = async () => {
   isThinking.value = true;
-  let score = 100;
   
-  // Algoritmo de cálculo preciso:
-  // Sueño es el factor más importante (hasta -35)
-  if (diagSleep.value === 'bad') score -= 35; 
-  else if (diagSleep.value === 'neutral') score -= 15;
-  
-  // Alimentación afecta regeneración (hasta -20)
-  if (diagFood.value === 'bad') score -= 20; 
-  else if (diagFood.value === 'neutral') score -= 10;
-  
-  // Estrés drena batería rápida (hasta -25)
-  if (diagStress.value === 'high') score -= 25; 
-  else if (diagStress.value === 'neutral') score -= 10;
-  
-  // Sobrecarga impide procesar más info (hasta -20)
-  if (diagCognitive.value === 'yes') score -= 20; 
-  else if (diagCognitive.value === 'little') score -= 10;
-  
-  // Límite inferior 5% (nunca 0 a menos que hagan tareas)
+  // Algoritmo de cálculo más preciso
+  let baseScore = 100;
+  const sleepPenalty = diagSleep.value === 'bad' ? 30 : diagSleep.value === 'neutral' ? 12 : 0;
+  const foodPenalty = diagFood.value === 'bad' ? 16 : diagFood.value === 'neutral' ? 8 : 0;
+  const hydrationPenalty = diagHydration.value === 'bad' ? 12 : diagHydration.value === 'neutral' ? 5 : 0;
+  const screenPenalty = diagScreenTime.value === 'high' ? 12 : diagScreenTime.value === 'neutral' ? 5 : 0;
+  const stressPenalty = diagStress.value === 'high' ? 18 : diagStress.value === 'neutral' ? 8 : 0;
+  const cognitivePenalty = diagCognitive.value === 'yes' ? 16 : diagCognitive.value === 'little' ? 8 : 0;
+
+  let score = baseScore - sleepPenalty - foodPenalty - hydrationPenalty - screenPenalty - stressPenalty - cognitivePenalty;
+
+  // Factor de arrastre (suavizar el cambio basándonos en la energía previa)
+  score = Math.floor((score * 0.8) + (energyLevel.value * 0.2));
+
+  // Límite inferior y superior
   if (score < 5) score = 5;
+  if (score > 100) score = 100;
+
+  // LÓGICA DE RACHA DE BIENESTAR (MÁXIMO +1 POR DÍA AL USAR EL ESCÁNER)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayStr = today.toDateString();
+  const lastStreakDateStr = localStorage.getItem('mindSyncLastStreakDate');
+  
+  let streakMessage = '';
+  
+  if (lastStreakDateStr !== todayStr) {
+    if (lastStreakDateStr) {
+      const lastDate = new Date(lastStreakDateStr);
+      const diffTime = Math.abs(today.getTime() - lastDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+      
+      if (diffDays > 1) {
+        const lostStreak = balanceStreak.value;
+        localStorage.setItem('mindSyncPreviousStreak', lostStreak.toString());
+        
+        balanceStreak.value = 1; // Rompió la racha
+        streakMessage = '¡Nueva racha de escáner iniciada!';
+        
+        if (lostStreak > 2) {
+           setTimeout(() => offerStreakRecovery(lostStreak), 3500);
+        }
+      } else {
+        balanceStreak.value++; // Racha continua
+        streakMessage = `¡Racha aumentada a ${balanceStreak.value}!`;
+        score += 2; // Pequeño bono de energía por mantener la racha
+        if (score > 100) score = 100;
+      }
+    } else {
+      balanceStreak.value = 1; // Primera vez
+      streakMessage = '¡Primera calibración! Racha iniciada';
+    }
+    
+    localStorage.setItem('mindSyncStreak', balanceStreak.value.toString());
+    localStorage.setItem('mindSyncLastStreakDate', todayStr);
+    
+    setTimeout(async () => {
+      const toast = await toastController.create({ message: `${streakMessage}`, icon: sparkles, duration: 3500, color: 'success' }); 
+      await toast.present();
+    }, 1500);
+  } else {
+    setTimeout(async () => {
+      const toast = await toastController.create({ message: 'Escáner preciso. (Racha de hoy asegurada)', icon: shieldCheckmarkOutline, duration: 2500, color: 'medium' }); 
+      await toast.present();
+    }, 1500);
+  }
 
   setTimeout(() => { energyLevel.value = score; isThinking.value = false; setDiagOpen(false); }, 1200);
 };
@@ -711,7 +750,7 @@ const calculateRealEnergy = async () => {
 // --- FUNCIONES NUEVAS ---
 const offerStreakRecovery = async (lostStreak: number) => {
   const alert = await alertController.create({
-    header: '💔 Racha Interrumpida',
+    header: 'Racha Interrumpida',
     message: `Axel notó que perdiste tu racha de ${lostStreak} días. La salud mental no es un camino perfecto. ¿Quieres realizar una Misión Comodín para restaurarla?`,
     buttons: [
       { text: 'Dejarla ir', role: 'cancel' },
@@ -720,7 +759,7 @@ const offerStreakRecovery = async (lostStreak: number) => {
         handler: () => {
           allTasks.value.unshift({ 
             id: Date.now(), title: `Comodín: Escribe 3 cosas que agradeces hoy`, materia: 'Reconexión', 
-            difficulty: 0, difficultyLabel: '🛡️ Comodín', source: 'manual' 
+            difficulty: 0, difficultyLabel: 'Comodín', source: 'manual' 
           });
         }
       }
@@ -733,11 +772,12 @@ const triggerRescueDrop = async () => {
   const randomMission = selfCareMissions[Math.floor(Math.random() * selfCareMissions.length)];
   allTasks.value.unshift({ 
     id: Date.now(), title: `¡Misión Relámpago! ${randomMission}`, materia: 'Axel te Cuida', 
-    difficulty: 0, difficultyLabel: '✨ Rescate', source: 'manual' 
+    difficulty: 0, difficultyLabel: 'Rescate', source: 'manual' 
   });
   if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
   const toast = await toastController.create({
-    message: '🎁 ¡Has trabajado mucho! Tómate una pausa obligatoria.',
+    message: '¡Has trabajado mucho! Tómate una pausa obligatoria.',
+    icon: warningOutline,
     duration: 4000, color: 'warning', position: 'top'
   });
   await toast.present();
@@ -745,7 +785,7 @@ const triggerRescueDrop = async () => {
 
 const magicBreakdown = async (task: Task) => {
   const alert = await alertController.create({
-    header: '✨ Desglose Mágico',
+    header: 'Desglose Mágico',
     message: '¿Quieres que Axel divida esta tarea pesada en pasos más simples?',
     buttons: [
       { text: 'No', role: 'cancel' },
@@ -754,9 +794,9 @@ const magicBreakdown = async (task: Task) => {
         if (idx > -1) {
           allTasks.value.splice(idx, 1);
           allTasks.value.unshift(
-            { id: Date.now()+2, title: `[Paso 3] Repaso final de ${task.title.substring(0,10)}...`, materia: task.materia, difficulty: 1, difficultyLabel: '🍃 Fácil', source: 'manual' },
-            { id: Date.now()+1, title: `[Paso 2] Desarrollo de ${task.title.substring(0,10)}...`, materia: task.materia, difficulty: 2, difficultyLabel: '💧 Medio', source: 'manual' },
-            { id: Date.now(), title: `[Paso 1] Buscar info para ${task.title.substring(0,10)}...`, materia: task.materia, difficulty: 1, difficultyLabel: '🍃 Fácil', source: 'manual' }
+            { id: Date.now()+2, title: `[Paso 3] Repaso final de ${task.title.substring(0,10)}...`, materia: task.materia, difficulty: 1, difficultyLabel: 'Fácil', source: 'manual' },
+            { id: Date.now()+1, title: `[Paso 2] Desarrollo de ${task.title.substring(0,10)}...`, materia: task.materia, difficulty: 2, difficultyLabel: 'Medio', source: 'manual' },
+            { id: Date.now(), title: `[Paso 1] Buscar info para ${task.title.substring(0,10)}...`, materia: task.materia, difficulty: 1, difficultyLabel: 'Fácil', source: 'manual' }
           );
         }
       }}
@@ -774,7 +814,7 @@ const processBrainDump = () => {
     lines.forEach((line, i) => {
       allTasks.value.push({
         id: Date.now() + i, title: line.charAt(0).toUpperCase() + line.slice(1), 
-        materia: 'Descarga', difficulty: 1, difficultyLabel: '🍃 Fácil', source: 'manual'
+        materia: 'Descarga', difficulty: 1, difficultyLabel: 'Fácil', source: 'manual'
       });
     });
     dumpText.value = '';
@@ -790,7 +830,7 @@ const openPomodoro = async (task: Task) => {
   const currentHour = new Date().getHours();
   if (task.difficulty === 3 && energyLevel.value <= 40 && currentHour >= 22) { // 10 PM
     const alert = await alertController.create({
-      header: '🌙 Protector Nocturno',
+      header: 'Protector Nocturno',
       message: 'Son más de las 10 PM y tu batería está baja. Tu cerebro ya no retendrá información compleja. Axel te sugiere dormir y atacar esto mañana.',
       buttons: [
         { text: 'Hacer caso a Axel', role: 'cancel' },
@@ -848,7 +888,7 @@ const handlePomodoroFinish = async () => {
 
 const triggerReflection = async () => {
   const alert = await alertController.create({
-    header: '🧠 Misión Superada',
+    header: 'Misión Superada',
     message: 'Terminaste esta tarea "Difícil". Del 1 al 10, ¿qué tan pesada fue realmente?',
     inputs: [{ name: 'score', type: 'number', min: 1, max: 10, value: 5 }],
     buttons: [
@@ -887,6 +927,19 @@ const getDifficultyColor = (d: number) => {
   if (d === 2) return 'line-blue';
   if (d === 1) return 'line-green';
   return 'line-gold';
+};
+const getDifficultyIcon = (d: number) => {
+  if (d === 3) return flameOutline;
+  if (d === 2) return waterOutline;
+  if (d === 1) return leafOutline;
+  return shieldCheckmarkOutline;
+};
+
+const getDifficultyIconColor = (d: number) => {
+  if (d === 3) return '#F56565';
+  if (d === 2) return '#4299E1';
+  if (d === 1) return '#48BB78';
+  return '#D69E2E';
 };
 
 const energyClass = computed(() => (energyLevel.value > 70 ? 'bg-high' : energyLevel.value > 30 ? 'bg-med' : 'bg-low'));
